@@ -6,6 +6,10 @@ Responsive, buildless hospitality website. Editable source and deployable site a
 
 Serve `dist/` with any static HTTP server. No package installation or build is needed.
 
+## Vercel
+
+Import this repository with the repository root as the Root Directory. `vercel.json` selects the static `dist/` output and disables installation and build steps. Pushes to `main` deploy through the connected Vercel project.
+
 ## Contact details
 
 WhatsApp: +256 777 157 159. Secondary telephone: +256 750 537 855 (from supplied TikTok profile screenshot). Email: shelohhomes@gmail.com. TikTok: @shelohhomes. Snapchat: https://snapchat.com/t/fDYcoE9G.
