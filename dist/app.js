@@ -42,3 +42,29 @@ const menu=$('.menu-toggle');menu.addEventListener('click',()=>{const opened=$('
 $$('#navigation a').forEach(a=>a.addEventListener('click',()=>{$('#navigation').classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open navigation');}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#navigation').classList.remove('open');menu.setAttribute('aria-expanded','false');}});
 $('#year').textContent=new Date().getFullYear();setDates();
+
+// Silent loops play only while visible; visitors can pause motion at any time.
+const ambientVideos = $$('.ambient-video');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let heroPaused = reducedMotion.matches, toursPaused = reducedMotion.matches;
+const visibleVideos = new Set();
+function syncAmbient(){
+  for(const video of ambientVideos){
+    const paused = video.classList.contains('hero-video') ? heroPaused : toursPaused;
+    if(paused || document.hidden || document.querySelector('dialog[open]') || !visibleVideos.has(video)) video.pause();
+    else {video.muted=true;video.play().catch(()=>{});}
+  }
+  const heroPlaying=!$('.hero-video').paused;
+  $('#hero-motion').innerHTML=heroPlaying?'Ⅱ <span>Pause video</span>':'▷ <span>Play video</span>';
+  $('#hero-motion').setAttribute('aria-label',heroPlaying?'Pause background video':'Play background video');
+  $('#tour-motion').textContent=toursPaused?'▷ Play previews':'Ⅱ Pause previews';
+  $('#tour-motion').setAttribute('aria-label',toursPaused?'Play tour previews':'Pause tour previews');
+}
+const videoObserver=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting)visibleVideos.add(entry.target);else visibleVideos.delete(entry.target);}syncAmbient();},{threshold:.1});
+ambientVideos.forEach(video=>{video.muted=true;if(reducedMotion.matches)video.pause();videoObserver.observe(video);});
+$('.hero-video').addEventListener('play',()=>{$('#hero-motion').innerHTML='Ⅱ <span>Pause video</span>';$('#hero-motion').setAttribute('aria-label','Pause background video');});
+$('#hero-motion').addEventListener('click',()=>{heroPaused=!$('.hero-video').paused;syncAmbient();});
+$('#tour-motion').addEventListener('click',()=>{toursPaused=!toursPaused;syncAmbient();});
+document.addEventListener('visibilitychange',syncAmbient);
+reducedMotion.addEventListener('change',e=>{heroPaused=e.matches;toursPaused=e.matches;syncAmbient();});
+$$('dialog').forEach(dialog=>new MutationObserver(syncAmbient).observe(dialog,{attributes:true,attributeFilter:['open']}));
