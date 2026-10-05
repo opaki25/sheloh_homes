@@ -1,0 +1,5 @@
+qa/
+*.tar.gz
+node_modules/
+*.log
+__pycache__/
